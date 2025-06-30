@@ -1,4 +1,6 @@
-# Token Export - Figma Plugin
+![screenshot](screenshot.png)
+
+# figma-token-export
 
 A powerful Figma plugin that exports design tokens, text styles, and shadow effects from your Figma designs into structured JSON format for use in your design systems and development workflows.
 
