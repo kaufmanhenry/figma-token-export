@@ -192,6 +192,14 @@
         border: 1px solid #ececec;
       }
 
+      .value-cell.alias-ref {
+        background: #f3f0ff;
+        color: #7c5cff;
+        font-style: italic;
+        font-family: inherit;
+        border: 1px dashed #d1c4e9;
+      }
+
       .color-value {
         display: inline-flex;
         align-items: center;
@@ -607,8 +615,6 @@
           
           const variables = this.exportData.variables;
 
-          console.log(variables);
-
           if (Object.keys(variables).length === 0) {
             tbody.innerHTML =
               '<tr><td colspan="6" class="empty-state"><h3>No variables found</h3><p>Create variables in your Figma file to see them here.</p></td></tr>';
@@ -674,7 +680,6 @@
             // Sanitize styleName for use as an ID
             const safeStyleName = styleName.replace(/[^a-zA-Z0-9_-]/g, '_');
             const itemId = `text_${safeStyleName}`;
-            console.log(itemId, this.selectedItems.textStyles);
             const isSelected = this.selectedItems.textStyles.has(itemId);
 
             html += `
@@ -685,9 +690,9 @@
                               } data-id="${itemId}">
                           </td>
                           <td>${this.escapeHtml(styleName)}</td>
-                          <td>${this.escapeHtml(styleData.fontFamily)}</td>
-                          <td>${styleData.fontSize}px</td>
-                          <td>${styleData.fontWeight}</td>
+                          <td>${this.renderValue(styleData.fontFamily, 'string')}</td>
+                          <td>${this.renderValue(styleData.fontSize, 'number')}px</td>
+                          <td>${this.renderValue(styleData.fontWeight, 'number')}</td>
                           <td>${this.renderLineHeight(styleData.lineHeight)}</td>
                       </tr>
                   `;
@@ -746,29 +751,38 @@
         }
 
         renderValue(value, type) {
+          // If value is an alias reference, show the reference name
+          if (typeof value === 'object' && value !== null && 'aliasTo' in value) {
+            return `<span class="value-cell alias-ref">→ ${this.escapeHtml(value.aliasTo)}</span>`;
+          }
           if (type === "color") {
             return this.renderColorValue(value);
           }
-
           if (typeof value === "string" && value.length > 50) {
             return `<span class="value-cell" title="${this.escapeHtml(
               value
             )}">${this.escapeHtml(value.substring(0, 50))}...</span>`;
           }
-
           return `<span class="value-cell">${this.escapeHtml(String(value))}</span>`;
         }
 
         renderColorValue(color) {
+          // If color is an alias, just show the reference name
+          if (typeof color === 'object' && color !== null && 'aliasTo' in color) {
+            return `<span class="value-cell alias-ref">→ ${this.escapeHtml(color.aliasTo)}</span>`;
+          }
           return `
-                  <div class="color-value">
-                      <div class="color-swatch" style="background-color: ${color}"></div>
-                      <span class="value-cell">${color}</span>
-                  </div>
-              `;
+            <div class="color-value">
+              <div class="color-swatch" style="background-color: ${color}"></div>
+              <span class="value-cell">${color}</span>
+            </div>
+          `;
         }
 
         renderLineHeight(lineHeight) {
+          if (typeof lineHeight === 'object' && lineHeight !== null && 'aliasTo' in lineHeight) {
+            return `<span class="value-cell alias-ref">→ ${this.escapeHtml(lineHeight.aliasTo)}</span>`;
+          }
           if (lineHeight === "auto") {
             return '<span class="value-cell">auto</span>';
           }
@@ -788,7 +802,6 @@
         }
 
         toggleItem(section, itemId, checked) {
-          console.log(section, itemId, checked);
           if (checked) {
             this.selectedItems[section].add(itemId);
           } else {
