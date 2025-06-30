@@ -23,7 +23,7 @@ A powerful Figma plugin that exports design tokens, text styles, and shadow effe
 
 1. **Clone or download this repository**
    ```bash
-   git clone https://github.com/kaufmanhenry/token-export.git
+   git clone https://github.com/kaufmanhenry/figma-token-export.git
    cd token-export
    ```
 
