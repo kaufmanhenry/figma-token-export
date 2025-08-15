@@ -912,8 +912,11 @@
             selectedData.shadows[styleName] = this.exportData.shadows[styleName];
           });
 
+          // Sort all data alphabetically before creating JSON
+          const sortedData = this.sortDataAlphabetically(selectedData);
+
           // Create and download JSON file
-          const jsonString = JSON.stringify(selectedData, null, 2);
+          const jsonString = JSON.stringify(sortedData, null, 2);
           const blob = new Blob([jsonString], { type: "application/json" });
           const url = URL.createObjectURL(blob);
 
@@ -924,6 +927,44 @@
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
+        }
+
+        // Helper method to sort data alphabetically
+        sortDataAlphabetically(data) {
+          const sortedData = {};
+
+          // Sort variables by collection name, then by variable name
+          if (data.variables && Object.keys(data.variables).length > 0) {
+            sortedData.variables = {};
+            const sortedCollections = Object.keys(data.variables).sort();
+            sortedCollections.forEach(collectionName => {
+              sortedData.variables[collectionName] = {};
+              const sortedVariables = Object.keys(data.variables[collectionName]).sort();
+              sortedVariables.forEach(varName => {
+                sortedData.variables[collectionName][varName] = data.variables[collectionName][varName];
+              });
+            });
+          }
+
+          // Sort text styles by name
+          if (data.textStyles && Object.keys(data.textStyles).length > 0) {
+            sortedData.textStyles = {};
+            const sortedTextStyles = Object.keys(data.textStyles).sort();
+            sortedTextStyles.forEach(styleName => {
+              sortedData.textStyles[styleName] = data.textStyles[styleName];
+            });
+          }
+
+          // Sort shadows by name
+          if (data.shadows && Object.keys(data.shadows).length > 0) {
+            sortedData.shadows = {};
+            const sortedShadows = Object.keys(data.shadows).sort();
+            sortedShadows.forEach(styleName => {
+              sortedData.shadows[styleName] = data.shadows[styleName];
+            });
+          }
+
+          return sortedData;
         }
 
         escapeHtml(text) {
